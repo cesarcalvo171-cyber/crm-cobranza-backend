@@ -25,7 +25,8 @@ CREATE TABLE customers (
   email VARCHAR(100),
   status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'overdue')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  deleted_at TIMESTAMP WITH TIME ZONE
 );
 
 -- 2. TABLA DE CRÉDITOS / PRÉSTAMOS (LOANS)
