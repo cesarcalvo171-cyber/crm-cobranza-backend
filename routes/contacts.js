@@ -59,7 +59,7 @@ module.exports = (supabase) => {
   };
 
   // Validación de contacto individual para creación o edición
-  const validateContact = (data, isUpdate = false) => {
+  const validateContact = (data, isUpdate = false, existingData = null) => {
     const errors = [];
     const name = data.name !== undefined ? data.name : null;
     const customer_number = data.customer_number !== undefined ? data.customer_number : null;
@@ -83,7 +83,19 @@ module.exports = (supabase) => {
     }
 
     // Validación de canales de contacto (debe existir al menos un medio)
-    if (!isUpdate || (data.whatsapp_number !== undefined || data.sms_number !== undefined)) {
+    // Para actualizaciones parciales, combinamos con el registro existente
+    if (isUpdate && existingData) {
+      const finalWhatsApp = data.whatsapp_number !== undefined ? data.whatsapp_number : existingData.whatsapp_number;
+      const finalSMS = data.sms_number !== undefined ? data.sms_number : existingData.sms_number;
+      
+      const wa = finalWhatsApp !== null ? finalWhatsApp.toString().trim() : '';
+      const sms = finalSMS !== null ? finalSMS.toString().trim() : '';
+      
+      if (!wa && !sms) {
+        errors.push('Debe proporcionar al menos un número de WhatsApp ("whatsapp_number") o Teléfono para SMS ("sms_number").');
+      }
+    } else if (!isUpdate) {
+      // Creación manual estándar
       const wa = whatsapp_number !== null ? whatsapp_number.toString().trim() : '';
       const sms = sms_number !== null ? sms_number.toString().trim() : '';
       if (!wa && !sms) {
@@ -350,7 +362,7 @@ module.exports = (supabase) => {
       }
 
       // 2. Validar datos de entrada (Validación parcial / flexible)
-      const { isValid, errors } = validateContact(req.body, true);
+      const { isValid, errors } = validateContact(req.body, true, existing);
       if (!isValid) {
         return sendError(res, 400, 'ValidationError', 'Los datos para la actualización son incorrectos.', errors);
       }
@@ -464,6 +476,10 @@ module.exports = (supabase) => {
 
     if (!rows || !Array.isArray(rows)) {
       return sendError(res, 400, 'BadRequest', 'El cuerpo de la petición debe contener un arreglo de filas en la propiedad "rows".');
+    }
+
+    if (rows.length > 500) {
+      return sendError(res, 400, 'LimitExceeded', 'El archivo supera el límite de 500 contactos permitidos por carga.');
     }
 
     try {

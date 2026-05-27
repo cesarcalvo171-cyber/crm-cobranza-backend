@@ -57,7 +57,8 @@ module.exports = (supabase) => {
         const { data: activeCustomers, error: fetchError } = await supabase
           .from('customers')
           .select('*')
-          .eq('status', statusToFetch);
+          .eq('status', statusToFetch)
+          .is('deleted_at', null);
 
         if (fetchError) {
           console.error('[DB ERROR] Error al buscar clientes para campaña masiva:', fetchError.message);
