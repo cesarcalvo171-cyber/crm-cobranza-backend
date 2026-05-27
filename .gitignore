@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno — NUNCA commitear claves reales
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
